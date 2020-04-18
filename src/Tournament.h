@@ -7,8 +7,12 @@ class Tournament {
 private:
 	Sim* simulation;
 	std::vector<Neural_Net> population;
+	std::vector<double> fitnesses;
 	int population_size;
 	int num_generations;
+	int generation;
+
+	double best_fitness;
 
 	double mutation_rate;
 	int iterations;
@@ -60,6 +64,16 @@ public:
 	//Modifies: itself
 	//Effects: Runs the tournament selection on the population of Neural Nets
 	void Run_Tournament();
+
+	//Requires: int tournament_size
+	//Modifies: population
+	//Effects: Performs tournament selection on the population of Neural_Networks
+	std::vector<Neural_Net> Tournament_Selection(int tournament_size);
+
+	//Requires: Robot robot
+	//Modifies: nothing
+	//Effects: Calculates the fitness of a particular robot at any particular moment in time
+	double Calculate_Fitness(Robot* robot);
 
 	~Tournament();
 	

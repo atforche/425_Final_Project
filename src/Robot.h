@@ -100,6 +100,11 @@ public:
 	//Effects: Resets the robot after it has collided
 	void Reset();
 
+	//Requires: nothing
+	//Modifies: nothing
+	//Effects: Returns the position of the Robot
+	Coordinate Get_Position();
+
 	~Robot();
 };
 

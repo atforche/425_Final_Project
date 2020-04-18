@@ -9,9 +9,9 @@ Sim sim;
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-	ofSetFrameRate(30);
-	tournament = new Tournament(20,20);
-	std::vector<int> hidden_layers = { 2,2 };
+	ofSetFrameRate(60);
+	tournament = new Tournament(50,50);
+	std::vector<int> hidden_layers = { 50,50 };
 	tournament->Initialize_Population(11, hidden_layers);
 	tournament->Initialize(20);
 }
