@@ -83,7 +83,7 @@ Neural_Net::Neural_Net(int num_inputs_in, int num_outputs_in, std::vector<int>& 
 
 	//Seed the random number generator
 	std::default_random_engine generator(rand());
-	std::uniform_real_distribution<double> distribution(-5, 5);
+	std::uniform_real_distribution<double> distribution(-1, 1);
 
 	layer_node_counts.push_back(num_outputs);
 	layers.resize(layer_node_counts.size());
@@ -124,9 +124,9 @@ double Neural_Net::Activation_Function(double x) {
 
 //----------------------------------------------------------------------------------------------------------------------------------
 
-Neural_Net Neural_Net::Deep_Copy() {
-	Neural_Net new_net = Neural_Net(num_inputs, num_outputs, layer_node_counts);
-	new_net.layers = layers;
+Neural_Net* Neural_Net::Deep_Copy() {
+	Neural_Net* new_net = new Neural_Net(num_inputs, num_outputs, layer_node_counts);
+	new_net->layers = layers;
 	return new_net;
 }
 
@@ -156,13 +156,13 @@ std::vector<double> Neural_Net::Execute(std::vector<double>& input_vector) {
 void Neural_Net::Mutate_Network(double mutation_rate) {
 	std::default_random_engine generator(rand());
 	std::uniform_real_distribution<double> distribution(0, 1);
-	std::uniform_real_distribution<double> distribution2(-5, 5);
+	std::uniform_real_distribution<double> distribution2(-1, 1);
 	for (size_t i = 0; i < layers.size(); ++i) {
 		for (size_t j = 0; j < layers[i].size(); ++j) {
 			for (size_t k = 0; k < layers[i][j].size(); ++k) {
 				double random = distribution(generator);
 				if (random < mutation_rate) {
-					layers[i][j][k] = distribution2(generator);
+					layers[i][j][k] += distribution2(generator);
 				}
 			}
 		}

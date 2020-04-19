@@ -5,18 +5,28 @@
 
 class Tournament {
 private:
+
+	int mode;
 	Sim* simulation;
-	std::vector<Neural_Net> population;
-	std::vector<double> fitnesses;
+	std::vector<Neural_Net> pred_population;
+	std::vector<double> pred_fitnesses;
+	std::vector<Neural_Net> prey_population;
+	std::vector<double> prey_fitnesses;
 	int population_size;
 	int num_generations;
 	int generation;
 
+	double average_fitness;
 	double best_fitness;
+	bool evolving_preds;
+
+	Neural_Net* best_prey;
+	Neural_Net* best_pred;
 
 	double mutation_rate;
 	int iterations;
-	Coordinate default_robot_position;
+	Coordinate default_pred_position;
+	Coordinate default_prey_position;
 
 public:
 
@@ -30,6 +40,11 @@ public:
 	//Effects: Creates a tournament with specified pop_size and and num_generations
 	Tournament(int pop_size_in, int num_generations_in);
 
+	//Requires: int
+	//Modifies: itself
+	//Effects: Sets the mode in which the robots neural networks will operate
+	void Set_Mode(int mode_in);
+
 	//Requires: double mutation_rate
 	//Modifies: itself
 	//Effects: Sets the mutation rate of the tournament to the input
@@ -39,11 +54,6 @@ public:
 	//Modifies: itself
 	//Effects: Initializes the population to a set of neural networks with random weights
 	void Initialize_Population(int num_inputs_in, std::vector<int> &hidden_layers_in);
-
-	//Requires: Neural_Net net
-	//Modifies: nothing
-	//Effects: Runs the Neural_Net in the simulation and determines its fitness
-	double Measure_Fitness(Neural_Net net);
 
 	//Requires: Robot robot
 	//Modifies: Sim* simulation
@@ -72,8 +82,33 @@ public:
 
 	//Requires: Robot robot
 	//Modifies: nothing
-	//Effects: Calculates the fitness of a particular robot at any particular moment in time
-	double Calculate_Fitness(Robot* robot);
+	//Effects: Calculates the fitness of a predator robot at any particular moment in time
+	double Calculate_Pred_Fitness(Robot* robot);
+
+	//Requires: Robot robot
+	//Modifies: nothing
+	//Effects: Calculates the fitness of a pey robot at any particular moment in time
+	double Calculate_Prey_Fitness(Robot* robot);
+
+	//Requires: std::vector<Neural_Net> pred_population, std::vector<double> pred_fitnesses
+	//Modifies: pred_population, pred_fitnesses
+	//Effects: Selects the new predator population
+	void Select_Pred_Population(std::vector<Neural_Net>& pred_population, std::vector<double> &pred_fitnesses);
+
+	//Requires: std::vector<Neural_Net> prey_population, std::vector<double> prey_fitnesses
+	//Modifies: prey_population, prey_fitnesses
+	//Effects: Selects the new prey population
+	void Select_Prey_Population(std::vector<Neural_Net>& prey_population, std::vector<double>& prey_fitnesses);
+
+	//Requires: nothing
+	//Modifies: nothing
+	//Effects: Returns the generation of the tournament
+	int Get_Generation();
+
+	//Requires: nothing
+	//Modifies: itself
+	//Effects: Swaps the population being evolved
+	void Swap_Population();
 
 	~Tournament();
 	

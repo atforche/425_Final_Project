@@ -105,6 +105,11 @@ public:
 	//Effects: Returns the position of the Robot
 	Coordinate Get_Position();
 
+	//Requires: nothing
+	//Modifies: nothing
+	//Effects: Returns the orientation of the Robot
+	double Get_Orientation();
+
 	~Robot();
 };
 

@@ -34,7 +34,7 @@ void Sim::Render(bool sensors) {
 		wall.Render();
 	}
 	for (Robot* robot : robots) {
-		robot->Render();
+		robot->Render(sensors);
 	}
 }
 
@@ -74,6 +74,10 @@ std::vector<Robot*> Sim::GetRobots() {
 //--------------------------------------------------------------------------------------
 
 void Sim::Reset() {
+	for (size_t i = 0; i < robots.size(); ++i) {
+		delete robots[i];
+		robots[i] = NULL;
+	}
 	robots.clear();
 }
 

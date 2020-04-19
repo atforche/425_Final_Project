@@ -188,6 +188,12 @@ Coordinate Robot::Get_Position() {
 
 //--------------------------------------------------------------------------------------
 
+double Robot::Get_Orientation() {
+	return rotation;
+}
+
+//--------------------------------------------------------------------------------------
+
 Robot::~Robot() {
 	for (Sensor* sensor : sensors) {
 		delete sensor;

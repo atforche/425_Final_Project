@@ -42,7 +42,7 @@ public:
     //Requires: nothing
     //Modifies: nothing
     //Effects: Returns a deep copy of itself
-    Neural_Net Deep_Copy();
+    Neural_Net* Deep_Copy();
 
     //Requires:: std::vector<double> input_vector
     //Modifies: nothing
