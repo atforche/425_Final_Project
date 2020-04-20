@@ -43,13 +43,15 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-	ofSetFrameRate(1000);
+	ofSetFrameRate(1);
 	if (tournament->Get_Generation() % num_generations == 0) {
 		ofSetFrameRate(60);
 	}
-	ofBackground(255, 204, 153);
+	//ofBackground(255, 204, 153);
 	//ofDrawCircle(700, 100, 5);
-	tournament->Run_Tournament();
+	//tournament->Run_Tournament();
+	//tournament->Render();
+	tournament->Test();
 }
 
 //--------------------------------------------------------------

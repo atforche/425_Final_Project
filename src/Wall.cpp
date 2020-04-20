@@ -15,7 +15,7 @@ Wall::Wall(Coordinate begin, Coordinate end) {
 //--------------------------------------------------------------------------------------
 
 void Wall::Render() {
-	ofSetColor(0, 0, 255);
+	ofSetColor(0, 255, 0);
 	ofSetLineWidth(5);
 	ofDrawLine(beginning.GetX(), beginning.GetY(), ending.GetX(), ending.GetY());
 }
@@ -30,4 +30,10 @@ Coordinate Wall::GetBeginning() {
 
 Coordinate Wall::GetEnding() {
 	return ending;
+}
+
+//--------------------------------------------------------------------------------------
+
+ofColor& Wall::Get_Color() {
+	return color;
 }

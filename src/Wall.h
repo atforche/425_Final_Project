@@ -9,6 +9,7 @@ private:
 
 	Coordinate beginning;
 	Coordinate ending;
+	ofColor color;
 
 public:
 
@@ -36,6 +37,11 @@ public:
 	//Modifies: nothing
 	//Effects: Returns the Coordinate of the walls ending
 	Coordinate GetEnding();
+
+	//Requires: ofColor color_in
+	//Modifies: itself
+	//Effects: Sets the color of the wall to the inputted color
+	ofColor& Get_Color();
 };
 
 #endif /* WALL_H*/

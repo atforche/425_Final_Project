@@ -3,6 +3,7 @@
 #include "Coordinate.h"
 #include "Orientation.h"
 #include "Wall.h"
+#include "Helpers.h"
 #include <vector>
 
 class Sensor {
@@ -40,6 +41,12 @@ public:
 	//Effects: Calculates the distance from the sensor to the nearest wall
 	double Calculate_Distance();
 
+	//Requires: ofColor& color_in
+	//Modifies: color_in
+	//Effects: Calculates the distance from the sensor to the nearest wall
+	//and writes the color of the wall into color_in
+	double Camera_Calculate_Distance(ofColor& color_in);
+
 	//Requires: min_dist to a wall
 	//Modifies: nothing
 	//Effects: Returns the point of intersection between the sensor and the nearest wall
@@ -65,6 +72,10 @@ public:
 	//Effects: Returns a referece to the orientation value of the sensor
 	Orientation& GetOrientation();
 	
+	//Requires: double rotation_in
+	//Modifies: itself
+	//Effects: Rotates the sensor by rotation_in degrees
+	void Rotate(double rotation_in);
 
 };
 

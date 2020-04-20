@@ -64,6 +64,38 @@ double Sensor::Calculate_Distance() {
 
 //--------------------------------------------------------------------------------------
 
+double Sensor::Camera_Calculate_Distance(ofColor& color_in) {
+	double min_dist = DBL_MAX;
+	int min_index = -1;
+
+	for (size_t i = 0; i < walls.size(); ++i) {
+		//First modify the coordinates and orientations to make sense in an XY place
+		Coordinate ray_origin = Coordinate(pos.GetX(), -pos.GetY());
+		Orientation ray_orientation = Orientation(orientation.GetX(), -orientation.GetY());
+		Coordinate segment_a = Coordinate(walls[i].GetBeginning().GetX(), -walls[i].GetBeginning().GetY());
+		Coordinate segment_b = Coordinate(walls[i].GetEnding().GetX(), -walls[i].GetEnding().GetY());
+
+		//Now calculate the distance https://rootllama.wordpress.com/2014/06/20/ray-line-segment-intersection-test-in-2d/
+		Coordinate v1 = Subtract(ray_origin, segment_a);
+		Coordinate v2 = Subtract(segment_b, segment_a);
+		Coordinate v3 = Coordinate(-ray_orientation.GetY(), ray_orientation.GetX());
+
+		double t1 = Cross_Product(v2, v1) / Dot_Product(v2, v3);
+		double t2 = Dot_Product(v1, v3) / Dot_Product(v2, v3);
+
+		if (t1 >= 0 && (0 <= t2 && t2 <= 1)) {
+			if (t1 < min_dist) {
+				min_dist = t1;
+				min_index = i;
+			}
+		}
+	}
+	color_in = walls[min_index].Get_Color();
+	return min_dist;
+}
+
+//--------------------------------------------------------------------------------------
+
 Coordinate Sensor::Wall_Collision(double min_dist) {
 	double new_x = pos.GetX() + orientation.GetX() * min_dist;
 	double new_y = pos.GetY() + orientation.GetY() * min_dist;
@@ -93,4 +125,11 @@ double& Sensor::GetRotation() {
 
 Orientation& Sensor::GetOrientation() {
 	return orientation;
+}
+
+void Sensor::Rotate(double rotation_in) {
+	rotation += rotation_in;
+	rotation = fmod(rotation, 360);
+	orientation.GetX() = cos(rotation * (PI / 180.0));
+	orientation.GetY() = sin(rotation * (PI / 180.0));
 }

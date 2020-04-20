@@ -57,6 +57,9 @@ void Sim::Initialize() {
 	this->Add_Wall(Wall(se, ne));
 	this->Add_Wall(Wall(nw, ne));
 
+	for (size_t i = 0; i < walls.size(); ++i) {
+		walls[i].Get_Color() = ofColor(0, 255, 0);
+	}
 }
 
 //--------------------------------------------------------------------------------------

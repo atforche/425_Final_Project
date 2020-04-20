@@ -22,6 +22,8 @@ private:
 	ofImage sprite;
 	std::vector<Wall> walls;
 	bool collided = false;
+	ofColor color;
+	bool pred;
 
 public:
 
@@ -109,6 +111,31 @@ public:
 	//Modifies: nothing
 	//Effects: Returns the orientation of the Robot
 	double Get_Orientation();
+
+	//Requires: std::vector<Robot> robots
+	//Modifies: nothing
+	//Effects: Returns a 2d matrix representing output from a "camera module" mounted on the robot
+	std::vector<int> Get_Camera_Output(std::vector<Robot*> robots);
+
+	//Requires: nothing
+	//Modifies: nothing
+	//Effects: Returns the width of the robot's sprite
+	double Get_Sprite_Width();
+
+	//Requires: ofColor color_in
+	//Modifies: itself
+	//Effects: Returns a reference to the color of the robot
+	ofColor& Get_Color();
+
+	//Requires: bool pred_in
+	//Modifies: itself
+	//Effects: Sets whether or not a robot is a predator
+	void Set_Pred(bool pred_in);
+
+	//Requires: nothing
+	//Modifies: nothing
+	//Effects: Returns whehter the robot is a predator
+	bool Get_Pred();
 
 	~Robot();
 };

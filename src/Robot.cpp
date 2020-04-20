@@ -58,6 +58,7 @@ void Robot::SetPosition(Coordinate position_in, double rotation_in) {
 //--------------------------------------------------------------------------------------
 
 void Robot::Render(bool render_sensors) {
+	ofSetColor(color);
 	ofPushMatrix();
 	ofTranslate(pos.GetX(), pos.GetY(), 0);
 	double angle = ((std::atan2(orientation.GetY(), orientation.GetX()) / PI) * 180.0);
@@ -101,10 +102,7 @@ void Robot::Rotate(double input) {
 
 		double angle = speed * input * (PI / 180.0);
 		for (Sensor* sensor : sensors) {
-			sensor->GetRotation() += 15 * input;
-			sensor->GetRotation() = fmod(sensor->GetRotation(), 360);
-			sensor->GetOrientation().GetX() = cos(sensor->GetRotation() * (PI / 180.0));
-			sensor->GetOrientation().GetY() = sin(sensor->GetRotation() * (PI / 180.0));
+			sensor->Rotate(15 * input);
 		}
 	}
 }
@@ -190,6 +188,104 @@ Coordinate Robot::Get_Position() {
 
 double Robot::Get_Orientation() {
 	return rotation;
+}
+
+//--------------------------------------------------------------------------------------
+
+std::vector<int> Robot::Get_Camera_Output(std::vector<Robot*> robots) {
+
+	std::vector<int> output;
+	std::vector<ofColor> color_readings;
+	std::vector<double> distance_readings;
+
+	//First, convert the robots that need to be detected into wall objects
+	//Each robots will be represented as a cross_shaped pair of walls for simplicity
+	std::vector<Wall> temp_walls = walls;
+
+	for (size_t i = 0; i < robots.size(); ++i) {
+		Coordinate position = robots[i]->Get_Position();
+		double sprite_width = robots[i]->Get_Sprite_Width();
+		Wall vertical(Coordinate(position.GetX(), position.GetY() - sprite_width / 2), Coordinate(position.GetX(), position.GetY() + sprite_width / 2));
+		vertical.Get_Color() = robots[i]->Get_Color();
+		Wall horizontal(Coordinate(position.GetX() - sprite_width / 2, position.GetY()), Coordinate(position.GetX() + sprite_width / 2, position.GetY()));
+		horizontal.Get_Color() = robots[i]->Get_Color();
+		temp_walls.push_back(vertical);
+		temp_walls.push_back(horizontal);
+	}
+
+	//Then, use 30 samples of the 45 degree FOV in front of the robot
+	//Constructing a vector from what each sample returns
+
+	//Initialize the camera sensor
+	Sensor camera(pos.GetX(), pos.GetY(), fmod(rotation - 22.5, 360));
+	camera.AddWalls(temp_walls);
+
+	//Get 30 samples from the 45 degree FOV in front of the robot (every 1.5 degrees)
+	for (int i = 0; i < 30; ++i) {
+		ofColor color_reading;
+		double distance_reading = camera.Camera_Calculate_Distance(color_reading);
+		color_readings.push_back(color_reading);
+		distance_readings.push_back(distance_reading);
+		camera.Rotate(1.5);
+	}
+
+	//Then, convert the sample vector into a 30x30 image type thingy
+	ofColor sky_color(0, 229, 255);
+	ofColor ground_color(255, 204, 153);
+
+	std::vector<std::vector<ofColor>> image;
+	std::vector<ofColor> column;
+	column.resize(distance_readings.size());
+	for (int i = 0; i < distance_readings.size(); ++i) {
+		int num_pixels = Map_Distance_To_Pixels(distance_readings[i]);
+		for (int j = (distance_readings.size() / 2) - (num_pixels / 2) - 1; j < (distance_readings.size() / 2) + (num_pixels / 2) - 1; ++j) {
+			column[j] = color_readings[i];
+		}
+		for (size_t i = 0; i < column.size(); ++i) {
+			if (column[i] == ofColor(255, 255, 255) && i >= (distance_readings.size() / 2) ) {
+				column[i] = sky_color;
+			}
+			else if (column[i] == ofColor(255, 255, 255)) {
+				column[i] = ground_color;
+			}
+		}
+		image.push_back(column);
+		column.clear();
+		column.resize(distance_readings.size());
+	}
+
+	//Print_Image(image);
+	ofSetColor(255, 255, 255);
+	ofImage picture = Create_Image(image);
+	picture.resize(300, 300);
+	picture.rotate90(-1);
+	picture.draw(400, 400);
+
+	return output;
+}
+
+//--------------------------------------------------------------------------------------
+
+double Robot::Get_Sprite_Width() {
+	return sprite.getWidth();
+}
+
+//--------------------------------------------------------------------------------------
+
+ofColor& Robot::Get_Color() {
+	return color;
+}
+
+//--------------------------------------------------------------------------------------
+
+void Robot::Set_Pred(bool pred_in) {
+	pred = pred_in;
+}
+
+//--------------------------------------------------------------------------------------
+
+bool Robot::Get_Pred() {
+	return pred;
 }
 
 //--------------------------------------------------------------------------------------

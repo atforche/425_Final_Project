@@ -36,3 +36,87 @@ std::vector<std::vector<double>> Matrix_Multiplication(std::vector<std::vector<d
 
 	return output;
 }
+
+//--------------------------------------------------------------------------------------
+
+int Map_Distance_To_Pixels(double distance_reading) {
+	int distance = int(distance_reading);
+	if (distance > 400) {
+		return 0;
+	}
+	else if (distance > 360) {
+		return 2;
+	}
+	else if (distance > 320) {
+		return 4;
+	}
+	else if (distance > 280) {
+		return 6;
+	}
+	else if (distance > 240) {
+		return 8;
+	}
+	else if (distance > 200) {
+		return 10;
+	}
+	else if (distance > 160) {
+		return 12;
+	}
+	else if (distance > 120) {
+		return 14;
+	}
+	else if (distance > 80) {
+		return 16;
+	}
+	else if (distance > 40) {
+		return 18;
+	}
+	else if (distance > 20) {
+		return 20;
+	}
+	else {
+		return 24;
+	}
+}
+//--------------------------------------------------------------------------------------
+
+void Print_Image(std::vector<std::vector<ofColor>> image) {
+	ofColor sky_color(0, 229, 255);
+	ofColor ground_color(255, 204, 153);
+
+	for (int i = image.size() - 1; i >= 0; --i) {
+		for (int j = 0; j < image[0].size(); ++j) {
+			if (image[j][i] == sky_color) {
+				std::cout << "s ";
+			}
+			else if (image[j][i] == ground_color) {
+				std::cout << "g ";
+			}
+			else if (image[j][i] == ofColor(255, 0, 0)) {
+				std::cout << "E ";
+			}
+			else if (image[j][i] == ofColor(0, 255, 0)) {
+				std::cout << "W ";
+			}
+			else if (image[j][i] == ofColor(0, 0, 255)) {
+				std::cout << "P ";
+			}
+		}
+		std::cout << '\n';
+	}
+}
+//--------------------------------------------------------------------------------------
+
+ofImage Create_Image(std::vector<std::vector<ofColor>> image) {
+	ofPixels picture;
+	picture.allocate(image.size(), image[0].size(), OF_IMAGE_COLOR);
+
+	for (int i = image.size() - 1; i >= 0; --i) {
+		for (int j = 0; j < image[0].size(); ++j) {
+			picture.setColor(i, j, image[j][i]);
+		}
+	}
+
+
+	return ofImage(picture);
+}

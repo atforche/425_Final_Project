@@ -110,6 +110,8 @@ public:
 	//Effects: Swaps the population being evolved
 	void Swap_Population();
 
+	void Test();
+
 	~Tournament();
 	
 };

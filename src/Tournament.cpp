@@ -22,8 +22,8 @@ Tournament::Tournament(int pop_size_in, int num_generations_in) {
 	num_generations = num_generations_in;
 	mutation_rate = 0.01;
 	iterations = 100;
-	default_pred_position = Coordinate(700, 100);
-	default_prey_position = Coordinate(400, 400);
+	default_pred_position = Coordinate(400, 100);
+	default_prey_position = Coordinate(400, 200);
 	generation = 1;
 	pred_fitnesses.resize(population_size);
 	prey_fitnesses.resize(population_size);
@@ -68,20 +68,22 @@ void Tournament::Initialize(int num_robots) {
 	simulation->Initialize();
 	//simulation->Add_Wall(Wall(Coordinate(400, 100), Coordinate(400, 700)));
 
-	ofImage robot_img("pred.png");
+	ofImage robot_img("sprite.png");
 	robot_img.resize(40, 40);
 	for (int i = 0; i < num_robots; ++i) {
 		//Add in the initial population of predators
-		Robot* robot = new Robot(default_pred_position.GetX(), default_pred_position.GetY(), -90);
+		Robot* robot = new Robot(default_pred_position.GetX(), default_pred_position.GetY(), 90);
+		robot->Get_Color() = ofColor(255, 0, 0);
+		robot->Set_Pred(true);
 		robot->SetSprite(robot_img);
 		Add_Robot(*robot);
 		robot->Initialize();
 	}
 	//Add in a single prey
 	Robot* prey = new Robot(default_prey_position.GetX(), default_prey_position.GetY(), -90);
-	ofImage sprite("sprite.png");
-	sprite.resize(40, 40);
-	prey->SetSprite(sprite);
+	prey->SetSprite(robot_img);
+	prey->Get_Color() = ofColor(0, 0, 255);
+	prey->Set_Pred(false);
 	Add_Robot(*prey);
 	prey->Initialize();
 }
@@ -104,9 +106,9 @@ void Tournament::Render() {
 	ofDrawBitmapString(message, 50, 75);
 	ofDrawBitmapString(message2, 50, 100);
 	ofDrawBitmapString(message3, 50, 125);
-	if (generation % num_generations == 0) {
+	//if (generation % num_generations == 0) {
 		simulation->Render();
-	}
+	//}
 }
 
 //--------------------------------------------------------------------------------------
@@ -338,10 +340,8 @@ void Tournament::Swap_Population() {
 	//simulation->Reset();
 	std::vector<Robot*> robots = simulation->GetRobots();
 
-	ofImage prey_image("sprite.png");
-	prey_image.resize(40, 40);
-	ofImage pred_image("pred.png");
-	pred_image.resize(40, 40);
+	ofImage robot_image("sprite.png");
+	robot_image.resize(40, 40);
 
 	if (evolving_preds) {
 		//Create the population of prey to be evolved
@@ -351,17 +351,21 @@ void Tournament::Swap_Population() {
 			//Add_Robot(*robot);
 			//robot->Initialize();
 
-			robots[i]->SetSprite(prey_image);
+			robots[i]->SetSprite(robot_image);
 			robots[i]->Reset();
 			robots[i]->SetPosition(default_prey_position, -90);
+			robots[i]->Get_Color() = ofColor(0, 0, 255);
+			robots[i]->Set_Pred(false);
 		}
 		/*Robot* pred = new Robot(default_pred_position.GetX(), default_pred_position.GetY(), -90);
 		pred->SetSprite(pred_image);
 		Add_Robot(*pred);
 		pred->Initialize();*/
 
-		robots.back()->SetSprite(pred_image);
+		robots.back()->SetSprite(robot_image);
 		robots.back()->SetPosition(default_pred_position, -90);
+		robots.back()->Get_Color() = ofColor(255, 0, 0);
+		robots.back()->Set_Pred(true);
 	}
 
 	else {
@@ -372,20 +376,37 @@ void Tournament::Swap_Population() {
 			Add_Robot(*robot);
 			robot->Initialize();*/
 
-			robots[i]->SetSprite(pred_image);
+			robots[i]->SetSprite(robot_image);
 			robots[i]->SetPosition(default_pred_position, -90);
 			robots[i]->Reset();
+			robots[i]->Get_Color() = ofColor(255, 0, 0);
+			robots[i]->Set_Pred(true);
 		}
 		/*Robot* prey = new Robot(default_prey_position.GetX(), default_prey_position.GetY(), -90);
 		prey->SetSprite(prey_image);
 		Add_Robot(*prey);
 		prey->Initialize();*/
 
-		robots.back()->SetSprite(prey_image);
+		robots.back()->SetSprite(robot_image);
 		robots.back()->SetPosition(default_prey_position, -90);
+		robots.back()->Get_Color() = ofColor(0, 0, 255);
+		robots.back()->Set_Pred(false);
+
 	}
 
 	evolving_preds = !evolving_preds;
+}
+
+//--------------------------------------------------------------------------------------
+
+void Tournament::Test() {
+	std::vector<Robot*> robots = simulation->GetRobots();
+	std::vector<Robot*> test = { robots[0] };
+	std::vector<int> output = robots.back()->Get_Camera_Output(test);
+	for (size_t i = 0; i < output.size(); ++i) {
+		std::cout << output[i] << " ";
+	}
+	std::cout << '\n';
 }
 
 //--------------------------------------------------------------------------------------
