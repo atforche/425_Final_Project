@@ -23,7 +23,7 @@ Tournament::Tournament(int pop_size_in, int num_generations_in) {
 	mutation_rate = 0.01;
 	iterations = 100;
 	default_pred_position = Coordinate(400, 100);
-	default_prey_position = Coordinate(400, 200);
+	default_prey_position = Coordinate(400, 400);
 	generation = 1;
 	pred_fitnesses.resize(population_size);
 	prey_fitnesses.resize(population_size);
@@ -402,11 +402,10 @@ void Tournament::Swap_Population() {
 void Tournament::Test() {
 	std::vector<Robot*> robots = simulation->GetRobots();
 	std::vector<Robot*> test = { robots[0] };
-	std::vector<int> output = robots.back()->Get_Camera_Output(test);
-	for (size_t i = 0; i < output.size(); ++i) {
-		std::cout << output[i] << " ";
-	}
-	std::cout << '\n';
+	std::vector<std::vector<ofColor>> output = robots.back()->Get_Camera_Output(test);
+	ofImage image = Create_Image(output);
+	image.resize(400, 400);
+	image.draw(200, 200);
 }
 
 //--------------------------------------------------------------------------------------

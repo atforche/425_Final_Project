@@ -84,7 +84,7 @@ void Print_Image(std::vector<std::vector<ofColor>> image) {
 	ofColor sky_color(0, 229, 255);
 	ofColor ground_color(255, 204, 153);
 
-	for (int i = image.size() - 1; i >= 0; --i) {
+	for (int i = 0; i < image.size(); ++i) {
 		for (int j = 0; j < image[0].size(); ++j) {
 			if (image[j][i] == sky_color) {
 				std::cout << "s ";
@@ -111,12 +111,35 @@ ofImage Create_Image(std::vector<std::vector<ofColor>> image) {
 	ofPixels picture;
 	picture.allocate(image.size(), image[0].size(), OF_IMAGE_COLOR);
 
-	for (int i = image.size() - 1; i >= 0; --i) {
+	for (int i = 0; i < image.size(); ++i) {
 		for (int j = 0; j < image[0].size(); ++j) {
-			picture.setColor(i, j, image[j][i]);
+			picture.setColor(i, j, image[i][j]);
 		}
 	}
 
-
 	return ofImage(picture);
+}
+
+//--------------------------------------------------------------------------------------
+
+std::vector<std::vector<std::vector<int>>> Decompose_Image(std::vector<std::vector<ofColor>> image_in) {
+	//Initialize a 30x30x3 array
+	std::vector<std::vector<std::vector<int>>> image;
+	image.resize(image_in.size());
+	for (size_t i = 0; i < image_in[0].size(); ++i) {
+		image[i].resize(image_in[0].size());
+		for (size_t j = 0; j < image[i].size(); ++j) {
+			image[i][j].resize(3);
+		}
+	}
+
+	for (int i = 0; i < image.size(); ++i) {
+		for (int j = 0; j < image[0].size(); ++j) {
+			image[i][j][0] = image_in[j][i].r;
+			image[i][j][1] = image_in[j][i].g;
+			image[i][j][2] = image_in[j][i].b;
+		}
+	}
+
+	return image;
 }

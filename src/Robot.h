@@ -115,7 +115,7 @@ public:
 	//Requires: std::vector<Robot> robots
 	//Modifies: nothing
 	//Effects: Returns a 2d matrix representing output from a "camera module" mounted on the robot
-	std::vector<int> Get_Camera_Output(std::vector<Robot*> robots);
+	std::vector<std::vector<ofColor>> Get_Camera_Output(std::vector<Robot*> robots);
 
 	//Requires: nothing
 	//Modifies: nothing

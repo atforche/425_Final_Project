@@ -23,5 +23,10 @@ void Print_Image(std::vector<std::vector<ofColor>> image);
 //Effects: Returns an ofImage from the 2d image array
 ofImage Create_Image(std::vector<std::vector<ofColor>> image);
 
+//Requires: std::vector<std::vector<ofColor>> image
+//Modifies: nothing
+//Effects: Decomposes the ofImage into a 30x30x3 array
+std::vector<std::vector<std::vector<int>>> Decompose_Image(std::vector<std::vector<ofColor>> image_in);
+
 
 #endif /* HELPERS_H */

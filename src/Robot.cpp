@@ -192,7 +192,7 @@ double Robot::Get_Orientation() {
 
 //--------------------------------------------------------------------------------------
 
-std::vector<int> Robot::Get_Camera_Output(std::vector<Robot*> robots) {
+std::vector<std::vector<ofColor>> Robot::Get_Camera_Output(std::vector<Robot*> robots) {
 
 	std::vector<int> output;
 	std::vector<ofColor> color_readings;
@@ -242,7 +242,7 @@ std::vector<int> Robot::Get_Camera_Output(std::vector<Robot*> robots) {
 			column[j] = color_readings[i];
 		}
 		for (size_t i = 0; i < column.size(); ++i) {
-			if (column[i] == ofColor(255, 255, 255) && i >= (distance_readings.size() / 2) ) {
+			if (column[i] == ofColor(255, 255, 255) && i < (distance_readings.size() / 2) ) {
 				column[i] = sky_color;
 			}
 			else if (column[i] == ofColor(255, 255, 255)) {
@@ -255,13 +255,7 @@ std::vector<int> Robot::Get_Camera_Output(std::vector<Robot*> robots) {
 	}
 
 	//Print_Image(image);
-	ofSetColor(255, 255, 255);
-	ofImage picture = Create_Image(image);
-	picture.resize(300, 300);
-	picture.rotate90(-1);
-	picture.draw(400, 400);
-
-	return output;
+	return image;
 }
 
 //--------------------------------------------------------------------------------------
