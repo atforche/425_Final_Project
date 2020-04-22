@@ -80,7 +80,7 @@ void Robot::Render(bool render_sensors) {
 //--------------------------------------------------------------------------------------
 
 void Robot::Move(double input) {
-	if (!collided) {
+	if (!Collided(input)) {
 		pos.GetX() = (pos.GetX() + input * speed * orientation.GetX());
 		pos.GetY() = (pos.GetY() + input * speed * orientation.GetY());
 
@@ -109,7 +109,7 @@ void Robot::Rotate(double input) {
 
 //--------------------------------------------------------------------------------------
 
-bool Robot::Collided() {
+bool Robot::Collided(int input) {
 	for (Wall wall : walls) {
 		Coordinate beginning = wall.GetBeginning();
 		Coordinate ending = wall.GetEnding();
@@ -121,9 +121,20 @@ bool Robot::Collided() {
 		if (std::abs(dist_ab - (dist_ac + dist_cb)) < 2) {
 			return true;
 		}
-
 		continue;
 	}
+
+	//Checks to see if the robot will move through a wall on its next move
+	if (input != 0) {
+		Sensor will_collide(pos.GetX(), pos.GetY(), rotation);
+		will_collide.AddWalls(walls);
+		double min_dist = will_collide.Calculate_Distance();
+		if (min_dist < input * speed) {
+			return true;
+		}
+	}
+
+
 	return false;
 }
 

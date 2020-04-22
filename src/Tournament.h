@@ -28,6 +28,8 @@ private:
 	Coordinate default_pred_position;
 	Coordinate default_prey_position;
 
+	int num_cycles;
+
 public:
 
 	//Requires: nothing
@@ -68,7 +70,7 @@ public:
 	//Requires: nothing
 	//Modifies: nothing
 	//Effects: Renders the Simulation
-	void Render();
+	void Render(bool render = false);
 
 	//Requires: nothing
 	//Modifies: itself
@@ -110,6 +112,32 @@ public:
 	//Effects: Swaps the population being evolved
 	void Swap_Population();
 
+	//Requires: std::vector<Robot*> &robots
+	//Modifies: robots
+	//Effects: Resets the robots and selects a new population of neural nets
+	void Reset_and_Select_Population(std::vector<Robot*>& robots);
+
+	//Requires: std::vector<Robot*> &robots
+	//Modifies: robots
+	//Effects: Moves and Evaluates the fitness of the robots that are in the evolving population
+	void Evaluate_Evolving_Population(std::vector<Robot*>& robots);
+
+	//Requires: std::vector<Robot*> &robots
+	//Modifies: robots
+	//Effects: Moves and Evaluates the fitness of the robot in the static population
+	void Evaluate_Static_Population(std::vector<Robot*>& robots);
+
+	//Requires: nothing
+	//Modifies: nothing
+	//Effects: Simulates the two saved Neural_Networks from the file
+	void Simulate_Brains_Initialize();
+
+	//Requires: nothing
+	//Modifies: nothing
+	//Effects: Simulates the two brains from the files
+	void Simulate_Brains();
+
+	//Helper function for testing the simulation
 	void Test();
 
 	~Tournament();

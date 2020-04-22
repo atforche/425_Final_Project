@@ -54,6 +54,21 @@ public:
     //Effects: Mutates the layers of the neural network with some given probability
     void Mutate_Network(double mutation_rate);
 
+    //Requires: nothing
+    //Modifies: nothing
+    //Effects: Returns the layers of the neural net
+    std::vector<std::vector<std::vector<double>>> Get_Layers();
+
+    //Requires: ofstream& outfile
+    //Modifies: outfile
+    //Effects: Stores the Neural_Net into outfile
+    void Print(ofstream &outfile);
+
+    //Requires: ifstream& infile
+    //Modifies: itself
+    //Effects: Returns the Neural_Net specified in the file
+    void Read(ifstream& infile);
+
 };
 
 #endif /* BRAIN_H */

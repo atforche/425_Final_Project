@@ -80,7 +80,7 @@ public:
 	//Requires: nothing
 	//Modifies: nothing
 	//Effects: Determines of the robot has collided with a wall
-	bool Collided();
+	bool Collided(int input = 0);
 
 	//Requires: nothing
 	//Modifies: nothing

@@ -99,7 +99,6 @@ Neural_Net::Neural_Net(int num_inputs_in, int num_outputs_in, std::vector<int>& 
 		last_num_neurons = layer_node_counts[i];
 	}
 	layer_node_counts.pop_back();
-
 }
 
 //----------------------------------------------------------------------------------------------------------------------------------
@@ -165,6 +164,85 @@ void Neural_Net::Mutate_Network(double mutation_rate) {
 					layers[i][j][k] += distribution2(generator);
 				}
 			}
+		}
+	}
+}
+
+//--------------------------------------------------------------------------------------
+
+std::vector<std::vector<std::vector<double>>> Neural_Net::Get_Layers() {
+	return layers;
+}
+
+//--------------------------------------------------------------------------------------
+
+void Neural_Net::Print(ofstream& outfile) {
+
+	outfile << num_inputs << '\n';
+	outfile << num_outputs << '\n';
+	outfile << layer_node_counts.size() << '\n';
+	for (size_t i = 0; i < layer_node_counts.size(); ++i) {
+		outfile << layer_node_counts[i] << " ";
+	}
+	outfile << '\n';
+
+	for (size_t i = 0; i < layers.size(); ++i) {
+		for (size_t j = 0; j < layers[i].size(); ++j) {
+			for (size_t k = 0; k < layers[i][j].size(); ++k) {
+				outfile << layers[i][j][k] << " ";
+			}
+		}
+		outfile << '\n';
+	}
+}
+
+//--------------------------------------------------------------------------------------
+
+void Neural_Net::Read(ifstream& infile) {
+	infile >> num_inputs;
+	infile >> num_outputs;
+	int hidden_layers;
+	infile >> hidden_layers;
+	layer_node_counts.resize(hidden_layers);
+	for (int i = 0; i < hidden_layers; ++i) {
+		infile >> layer_node_counts[i];
+	}
+	layers.resize(hidden_layers + 1);
+	for (size_t i = 0; i < layers.size(); ++i) {
+		if (i == layers.size() - 1) {
+			layers[0].resize(num_inputs + 1);
+		}
+		else {
+			layers[i + 1].resize(layer_node_counts[i] + 1);
+		}
+	}
+
+	for (size_t i = 0; i < layers.size(); ++i) {
+		for (size_t j = 0; j < layers[i].size(); ++j) {
+			if (i != layers.size() - 1) {
+				layers[i][j].resize(layer_node_counts[i]);
+			}
+			else {
+				layers[i][j].resize(num_outputs);
+			}
+		}
+	}
+
+	for (int i = 0; i < num_inputs + 1; ++i) {
+		for (int j = 0; j < layer_node_counts[0]; ++j) {
+			infile >> layers[0][i][j];
+		}
+	}
+
+	for (int i = 0; i < layer_node_counts[0] + 1; ++i) {
+		for (int j = 0; j < layer_node_counts[1]; ++j) {
+			infile >> layers[1][i][j];
+		}
+	}
+
+	for (int i = 0; i < layer_node_counts[1] + 1; ++i) {
+		for (int j = 0; j < num_outputs; ++j) {
+			infile >> layers[2][i][j];
 		}
 	}
 }

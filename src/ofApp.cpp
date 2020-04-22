@@ -7,16 +7,15 @@ Tournament* tournament;
 Sim sim;
 int num_generations;
 
-enum MODE {Position, Sensors, Image_Sensor};
+enum MODE {Position, Sensors, Image, Image_and_Sensors};
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-	ofSetFrameRate(1000);
 	ofSetVerticalSync(false);
 	ofEnableAlphaBlending();
-	MODE mode = Sensors;
-	int population_size = 50;
-	num_generations = 100;
+	MODE mode = Image_and_Sensors;
+	int population_size = 30;
+	num_generations = 25;
 	tournament = new Tournament(population_size,num_generations);
 	std::vector<int> hidden_layers;
 	switch (mode) {
@@ -28,12 +27,17 @@ void ofApp::setup(){
 		hidden_layers = { 11,11 };
 		tournament->Initialize_Population(11, hidden_layers);
 		break;
-	case Image_Sensor:
-
+	case Image:
+		hidden_layers = { 200,50 };
+		tournament->Initialize_Population(28, hidden_layers);
 		break;
+	case Image_and_Sensors:
+		hidden_layers = { 50,10 };
+		tournament->Initialize_Population(39, hidden_layers);
 	}
 	tournament->Set_Mode(mode);
 	tournament->Initialize(population_size);
+	//tournament->Simulate_Brains_Initialize();
 }
 
 //--------------------------------------------------------------
@@ -43,15 +47,17 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-	ofSetFrameRate(1);
+	ofSetFrameRate(1000);
+	//ofSetFrameRate(20);
 	if (tournament->Get_Generation() % num_generations == 0) {
-		ofSetFrameRate(60);
+		ofSetFrameRate(30);
 	}
-	//ofBackground(255, 204, 153);
+	ofBackground(255, 204, 153);
 	//ofDrawCircle(700, 100, 5);
-	//tournament->Run_Tournament();
-	//tournament->Render();
-	tournament->Test();
+	tournament->Run_Tournament();
+	//tournament->Render(false);
+	//tournament->Test();
+	//tournament->Simulate_Brains();
 }
 
 //--------------------------------------------------------------
