@@ -163,14 +163,14 @@ std::vector<std::vector<double>> Convolute_Image(std::vector<std::vector<ofColor
 
 	//Initialize the convolution matrix
 	std::vector<std::vector<double>> convolution;
-	convolution.resize(cols-2);
+	convolution.resize(cols / 3);
 	for (size_t i = 0; i < convolution.size(); ++i) {
-		convolution[i].resize(rows-2);
+		convolution[i].resize(rows / 3);
 	}
 
 	for (size_t item = 0; item < con_filters.size(); ++item) {
-		for (size_t i = 1; i < cols - filter_size + 2; ++i) {
-			for (size_t j = 1; j < rows - filter_size + 2; ++j) {
+		for (size_t i = 1; i < cols - filter_size + 2; i += 3) {
+			for (size_t j = 1; j < rows - filter_size + 2; j += 3) {
 				double sum = 0;
 				//Now apply the filter over the 3x3 region surrounding the current pixel
 				for (size_t x = 0; x < filter_size; ++x) {
@@ -180,7 +180,7 @@ std::vector<std::vector<double>> Convolute_Image(std::vector<std::vector<ofColor
 						sum += int(image[i + x - 1][j + y - 1].b) * con_filters[item][x][y];
 					}
 				}
-				convolution[j - 1][i - 1] += (sum / 255);
+				convolution[i / 3][j / 3] += (sum / 255);
 			}
 		}
 	}
@@ -194,12 +194,12 @@ std::vector<double> Column_Pooling(std::vector<std::vector<double>> &image) {
 	std::vector<double> output;
 	output.resize(image.size());
 
-	for (size_t i = 0; i < image[0].size(); ++i) {
+	for (size_t i = 0; i < image.size(); ++i) {
 		double sum = 0;
-		for (size_t j = 0; j < image.size(); ++j) {
-			sum += image[j][i];
+		for (size_t j = 0; j < image[0].size(); ++j) {
+			sum += image[i][j];
 		}
-		output[i] = sum;
+		output[i] = sum / image[0].size();
 	}
 
 	return output;
@@ -266,3 +266,17 @@ double Neural_Net_Sharing(Neural_Net* a, Neural_Net* b) {
 
 //--------------------------------------------------------------------------------------
 
+void Color_Filter(std::vector<std::vector<ofColor>>& camera_output, bool predator) {
+	for (size_t i = 0; i < camera_output.size(); ++i) {
+		for (size_t j = 0; j < camera_output[0].size(); ++j) {
+			if (predator) {
+				camera_output[i][j].g = 0;
+				camera_output[i][j].r = 0;
+			}
+			else {
+				camera_output[i][j].g = 0;
+				camera_output[i][j].b = 0;
+			}
+		}
+	}
+}

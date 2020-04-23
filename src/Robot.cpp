@@ -236,32 +236,32 @@ std::vector<std::vector<ofColor>> Robot::Get_Camera_Output(std::vector<Robot*> r
 	//Constructing a vector from what each sample returns
 
 	//Initialize the camera sensor
-	Sensor camera(pos.GetX(), pos.GetY(), fmod(rotation - 60, 360));
+	Sensor camera(pos.GetX(), pos.GetY(), fmod(rotation - 45, 360));
 	camera.AddWalls(temp_walls);
 
-	//Get 30 samples from the 120 degree FOV in front of the robot (every 1.5 degrees)
-	for (int i = 0; i < 60; ++i) {
+	//Get 180 samples from the 90 degree FOV in front of the robot (every 1.5 degrees)
+	for (int i = 0; i < 270; ++i) {
 		ofColor color_reading;
 		double distance_reading = camera.Camera_Calculate_Distance(color_reading);
 		color_readings.push_back(color_reading);
 		distance_readings.push_back(distance_reading);
-		camera.Rotate(2);
+		camera.Rotate(0.33);
 	}
 
 	//Then, convert the sample vector into a 30x30 image type thingy
-	ofColor sky_color(0, 229, 255);
+	ofColor sky_color(0, 102, 204);
 	ofColor ground_color(255, 204, 153);
 
 	std::vector<std::vector<ofColor>> image;
 	std::vector<ofColor> column;
-	column.resize(distance_readings.size());
+	column.resize(60);
 	for (int i = 0; i < distance_readings.size(); ++i) {
 		int num_pixels = Map_Distance_To_Pixels(distance_readings[i]);
-		for (int j = (distance_readings.size() / 2) - (num_pixels / 2) - 1; j < (distance_readings.size() / 2) + (num_pixels / 2) - 1; ++j) {
+		for (int j = (60 / 2) - (num_pixels / 2) - 1; j < (60 / 2) + (num_pixels / 2) - 1; ++j) {
 			column[j] = color_readings[i];
 		}
 		for (size_t i = 0; i < column.size(); ++i) {
-			if (column[i] == ofColor(255, 255, 255) && i < (distance_readings.size() / 2) ) {
+			if (column[i] == ofColor(255, 255, 255) && i < (60 / 2) ) {
 				column[i] = sky_color;
 			}
 			else if (column[i] == ofColor(255, 255, 255)) {
@@ -270,7 +270,7 @@ std::vector<std::vector<ofColor>> Robot::Get_Camera_Output(std::vector<Robot*> r
 		}
 		image.push_back(column);
 		column.clear();
-		column.resize(distance_readings.size());
+		column.resize(60);
 	}
 
 	//Print_Image(image);

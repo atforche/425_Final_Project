@@ -55,4 +55,8 @@ double Neural_Net_Distance(std::vector<std::vector<std::vector<double>>>& x_laye
 //Effect: Returns the factor by which the fitness of the individual should be decreased by fitness sharing
 double Neural_Net_Sharing(Neural_Net* a, Neural_Net* b);
 
+//Requires: std::vector<std::vector<ofColor>> camera_output, bool predator
+//Modifies: camera_input
+//Effects: Performs a color filter over the camera_output
+void Color_Filter(std::vector<std::vector<ofColor>> &camera_output, bool predator);
 #endif /* HELPERS_H */

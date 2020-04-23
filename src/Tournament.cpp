@@ -22,8 +22,8 @@ Tournament::Tournament(int pop_size_in, int num_generations_in) {
 	num_generations = num_generations_in;
 	mutation_rate = 0.10;
 	iterations = 100;
-	default_pred_position = Coordinate(400, 100);
-	default_prey_position = Coordinate(400, 400);
+	default_pred_position = Coordinate(200, 400);
+	default_prey_position = Coordinate(600, 400);
 	generation = 1;
 	pred_fitnesses.resize(population_size);
 	prey_fitnesses.resize(population_size);
@@ -65,9 +65,9 @@ void Tournament::Add_Robot(Robot &robot_in) {
 //--------------------------------------------------------------------------------------
 
 void Tournament::Initialize(int num_robots) {
-	simulation = new Sim(ofGetWindowWidth(), ofGetWindowHeight());
+	simulation = new Sim(800, 800);
 	simulation->Initialize();
-	//simulation->Add_Wall(Wall(Coordinate(400, 100), Coordinate(400, 700)));
+	simulation->Add_Wall(Wall(Coordinate(400, 300), Coordinate(400, 500)));
 
 	ofImage robot_img("sprite.png");
 	robot_img.resize(40, 40);
@@ -141,8 +141,8 @@ void Tournament::Run_Tournament(bool render) {
 		ofstream outfile1;
 		ofstream outfile2;
 
-		outfile1.open("robots/pred.txt");
-		outfile2.open("robots/prey.txt");
+		outfile1.open("robots_Wall/pred.txt");
+		outfile2.open("robots_Wall/prey.txt");
 
 		best_pred->Print(outfile1);
 		best_prey->Print(outfile2);
@@ -162,11 +162,11 @@ void Tournament::Run_Tournament(bool render) {
 		ofstream pred_outfile;
 		ofstream prey_outfile;
 
-		std::string pred = "robots/pred_";
+		std::string pred = "robots_Wall/pred_";
 		pred += to_string(cycles);
 		pred += ".txt";
 
-		std::string prey = "robots/prey_";
+		std::string prey = "robots_Wall/prey_";
 		prey += to_string(cycles);
 		prey += ".txt";
 
@@ -459,10 +459,24 @@ void Tournament::Evaluate_Evolving_Population(std::vector<Robot*>& robots) {
 			else {
 				std::vector<Robot*> robots_to_detect = { robots[i + population_size] };
 				std::vector<std::vector<ofColor>> camera_output = robots[i]->Get_Camera_Output(robots_to_detect);
+				Color_Filter(camera_output, robots[i]->Get_Pred());
 				std::vector<std::vector<double>> convolution = Convolute_Image(camera_output);
 				std::vector<double> pooled_output = Column_Pooling(convolution);
-				Map_Values(pooled_output);
+				//Map_Values(pooled_output);
 				sensor_readings = pooled_output;
+
+				/*ofImage image = Create_Image(camera_output);
+				ofSetColor(255, 255, 255);
+				image.draw(800, 500);
+
+				ofImage grayscale;
+				grayscale.allocate(pooled_output.size(), 1, OF_IMAGE_GRAYSCALE);
+				for (int i = 0; i < pooled_output.size(); ++i) {
+					grayscale.setColor(i, 0, ofColor(10 * pooled_output[i]));
+				}
+				grayscale.resize(268, 178);
+				grayscale.draw(800, 300);*/
+
 				if (mode == 3) {
 					std::vector<double> additional_readings = robots[i]->GetSensorReadings();
 					Map_Values(additional_readings);
@@ -524,10 +538,23 @@ void Tournament::Evaluate_Static_Population(std::vector<Robot*>& robots) {
 				std::vector<Robot*> robots_to_detect = { robots[i] };
 				//std::vector<Robot*> robots_to_detect(robots.begin(), robots.begin() + population_size);
 				std::vector<std::vector<ofColor>> camera_output = robots[i + population_size]->Get_Camera_Output(robots_to_detect);
+				Color_Filter(camera_output, robots[i + population_size]->Get_Pred());
 				std::vector<std::vector<double>> convolution = Convolute_Image(camera_output);
 				std::vector<double> pooled_output = Column_Pooling(convolution);
-				Map_Values(pooled_output);
+				//Map_Values(pooled_output);
 				sensor_readings = pooled_output;
+
+				/*ofImage image = Create_Image(camera_output);
+				ofSetColor(255, 255, 255);
+				image.draw(800, 200);
+
+				ofImage grayscale;
+				grayscale.allocate(pooled_output.size(), 1, OF_IMAGE_GRAYSCALE);
+				for (int i = 0; i < pooled_output.size(); ++i) {
+					grayscale.setColor(i, 0, ofColor(10 * pooled_output[i]));
+				}
+				grayscale.resize(268, 178);
+				grayscale.draw(800, 0);*/
 
 				if (mode == 3) {
 					std::vector<double> additional_readings = robots[i + population_size]->GetSensorReadings();
@@ -564,7 +591,7 @@ void Tournament::Simulate_Brains_Initialize() {
 	prey_population.push_back(test2);
 
 	delete simulation;
-	simulation = new Sim(ofGetWindowWidth(), ofGetWindowHeight());
+	simulation = new Sim(800, 800);
 	simulation->Initialize();
 	//simulation->Add_Wall(Wall(Coordinate(400, 100), Coordinate(400, 700)));
 
@@ -599,11 +626,11 @@ void Tournament::Simulate_Brains() {
 	static int cycle = 1;
 
 	if (iteration == 0) {
-		string pred = "robots/pred_";
+		string pred = "robots_Wall/pred_";
 		pred += to_string(cycle);
 		pred += ".txt";
 
-		string prey = "robots/prey_";
+		string prey = "robots_Wall/prey_";
 		prey += to_string(cycle);
 		prey += ".txt";
 
@@ -645,13 +672,23 @@ void Tournament::Simulate_Brains() {
 			else {
 				std::vector<Robot*> robots_to_detect = { robots[!i] };
 				std::vector<std::vector<ofColor>> camera_output = robots[i]->Get_Camera_Output(robots_to_detect);
-				ofImage image = Create_Image(camera_output);
-				ofSetColor(255, 255, 255);
-				image.draw(200, 200);
+				Color_Filter(camera_output, robots[i]->Get_Pred());
 				std::vector<std::vector<double>> convolution = Convolute_Image(camera_output);
 				std::vector<double> pooled_output = Column_Pooling(convolution);
-				Map_Values(pooled_output);
+				//Map_Values(pooled_output);
 				sensor_readings = pooled_output;
+
+				ofImage image = Create_Image(camera_output);
+				ofSetColor(255, 255, 255);
+				image.draw(800, 200 + 300 * i);
+
+				ofImage grayscale;
+				grayscale.allocate(pooled_output.size(), 1, OF_IMAGE_GRAYSCALE);
+				for (int i = 0; i < pooled_output.size(); ++i) {
+					grayscale.setColor(i, 0, ofColor( 10 * pooled_output[i]));
+				}
+				grayscale.resize(268, 178);
+				grayscale.draw(800, 0 + 300 * i);
 
 				if (mode == 3) {
 					std::vector<double> additional_readings = robots[i]->GetSensorReadings();
@@ -704,12 +741,12 @@ void Tournament::Test() {
 	//}
 
 	ofstream outfile;
-	outfile.open("robots/one.txt");
+	outfile.open("robots_Wall/one.txt");
 	pred_population[0].Print(outfile);
 	outfile.close();
 
 	ifstream infile;
-	infile.open("robots/one.txt");
+	infile.open("robots_Wall/one.txt");
 	std::vector<int> hidden_layers = { 1 };
 	Neural_Net test(1, 1, hidden_layers);
 	test.Read(infile);
