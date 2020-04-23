@@ -80,7 +80,7 @@ public:
 	//Requires: nothing
 	//Modifies: nothing
 	//Effects: Determines of the robot has collided with a wall
-	bool Collided(int input = 0);
+	bool Collided(double input = 0, Robot* robot = NULL);
 
 	//Requires: nothing
 	//Modifies: nothing
@@ -136,6 +136,11 @@ public:
 	//Modifies: nothing
 	//Effects: Returns whehter the robot is a predator
 	bool Get_Pred();
+
+	//Requires: nothing
+	//Modifies: nothing
+	//Effects: Returns whether or not the robot has collided
+	bool Get_Collided();
 
 	~Robot();
 };

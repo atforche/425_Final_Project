@@ -20,7 +20,7 @@ Tournament::Tournament(int pop_size_in, int num_generations_in) {
 	simulation = NULL;
 	population_size = pop_size_in;
 	num_generations = num_generations_in;
-	mutation_rate = 0.15;
+	mutation_rate = 0.10;
 	iterations = 100;
 	default_pred_position = Coordinate(400, 100);
 	default_prey_position = Coordinate(400, 400);
@@ -79,14 +79,19 @@ void Tournament::Initialize(int num_robots) {
 		robot->SetSprite(robot_img);
 		Add_Robot(*robot);
 		robot->Initialize();
+		robot->SetSpeed(10);
+	}	
+
+	for (int i = 0; i < num_robots; ++i) {
+		//Add in the initial population of prey
+		Robot* prey = new Robot(default_prey_position.GetX(), default_prey_position.GetY(), -90);
+		prey->SetSprite(robot_img);
+		prey->Get_Color() = ofColor(0, 0, 255);
+		prey->Set_Pred(false);
+		Add_Robot(*prey);
+		prey->Initialize();
+		prey->SetSpeed(15);
 	}
-	//Add in a single prey
-	Robot* prey = new Robot(default_prey_position.GetX(), default_prey_position.GetY(), -90);
-	prey->SetSprite(robot_img);
-	prey->Get_Color() = ofColor(0, 0, 255);
-	prey->Set_Pred(false);
-	Add_Robot(*prey);
-	prey->Initialize();
 }
 
 //--------------------------------------------------------------------------------------
@@ -103,13 +108,16 @@ void Tournament::Render(bool render) {
 	std::string message = "Generation: " + std::to_string(generation);
 	std::string message2 = "Average Fitness: " + std::to_string(average_fitness);
 	std::string message3 = "Best Fitness: " + std::to_string(best_fitness);
-	ofDrawBitmapString(message0, 50, 50);
-	ofDrawBitmapString(message, 50, 75);
+	ofDrawBitmapString(message, 50, 50);
+	ofDrawBitmapString(message0, 50, 75);
 	ofDrawBitmapString(message2, 50, 100);
 	ofDrawBitmapString(message3, 50, 125);
+	
+	
 	if (!render) {
 		if (generation % num_generations == 0) {
 			simulation->Render();
+			
 		}
 	}
 	else {
@@ -119,14 +127,11 @@ void Tournament::Render(bool render) {
 
 //--------------------------------------------------------------------------------------
 
-void Tournament::Run_Tournament() {
+void Tournament::Run_Tournament(bool render) {
 	static int cycles = 0;
 	static bool paused = false;
 	static int iteration = 0;
 	static std::vector<Robot*> robots = simulation->GetRobots();
-	std::string message = "Iteration: ";
-	message += to_string(iteration);
-	ofDrawBitmapString(message, 50, 150);
 
 	if (cycles == num_cycles && !paused) {
 		system("pause");
@@ -153,6 +158,25 @@ void Tournament::Run_Tournament() {
 
 	/* SWAP WHICH POPULATION IS BEING EVOLVED*/
 	if (generation > num_generations) {
+
+		ofstream pred_outfile;
+		ofstream prey_outfile;
+
+		std::string pred = "robots/pred_";
+		pred += to_string(cycles);
+		pred += ".txt";
+
+		std::string prey = "robots/prey_";
+		prey += to_string(cycles);
+		prey += ".txt";
+
+		pred_outfile.open(pred);
+		prey_outfile.open(prey);
+		best_pred->Print(pred_outfile);
+		best_prey->Print(prey_outfile);
+		pred_outfile.close();
+		prey_outfile.close();
+
 		Swap_Population();
 		generation = 0;
 		mutation_rate = 0.1;
@@ -161,6 +185,8 @@ void Tournament::Run_Tournament() {
 
 	/* SELECTING A NEW GENERATION ONLY HAPPENS EVERY iterations ITERATIONS*/
 	if (iteration > iterations) {
+		//default_pred_position = Coordinate((rand() % 600) + 100, (rand() % 600) + 100);
+		//default_prey_position = Coordinate((rand() % 600) + 100, (rand() % 600) + 100);
 		//Reset the robots begin evolved
 		Reset_and_Select_Population(robots);
 		iteration = 0;
@@ -175,7 +201,7 @@ void Tournament::Run_Tournament() {
 	Evaluate_Static_Population(robots);
 
 	/* RENDER THE SIMULATION */
-	Render(true);
+	Render(render);
 	++iteration;
 	
 }
@@ -233,17 +259,26 @@ std::vector<Neural_Net> Tournament::Tournament_Selection(int tournament_size) {
 
 //--------------------------------------------------------------------------------------
 
-double Tournament::Calculate_Pred_Fitness(Robot* robot) {
-	Coordinate prey_position = simulation->GetRobots().back()->Get_Position();
+double Tournament::Calculate_Pred_Fitness(Robot* robot, int index) {
+	double max_dist = 1131;
+	if (robot->Collided()) {
+		return -1000;
+	}
+	Coordinate prey_position = simulation->GetRobots().at(index + population_size)->Get_Position();
 	double dist = Distance(robot->Get_Position(), prey_position);
-	if (dist == 0) { dist = 0.00001; };
-	return 1 / dist;
+	return max_dist - dist;
 }
 
 //--------------------------------------------------------------------------------------
 
-double Tournament::Calculate_Prey_Fitness(Robot* robot) {
-	Coordinate pred_position = simulation->GetRobots().back()->Get_Position();
+double Tournament::Calculate_Prey_Fitness(Robot* robot, int index) {
+	if (robot->Collided()) {
+		return -10000;
+	}
+	else if (robot->Collided(0, simulation->GetRobots().at(index + population_size))) {
+		return -1000000;
+	}
+	Coordinate pred_position = simulation->GetRobots().at(index + population_size)->Get_Position();
 	double dist = Distance(robot->Get_Position(), pred_position);
 	return dist;
 }
@@ -308,16 +343,21 @@ void Tournament::Swap_Population() {
 			robots[i]->SetPosition(default_prey_position, -90);
 			robots[i]->Get_Color() = ofColor(0, 0, 255);
 			robots[i]->Set_Pred(false);
+			robots[i]->SetSpeed(15);
+
+			robots[i + population_size]->SetSprite(robot_image);
+			robots[i + population_size]->SetPosition(default_pred_position, 90);
+			robots[i + population_size]->Get_Color() = ofColor(255, 0, 0);
+			robots[i + population_size]->Set_Pred(true);
+			robots[i + population_size]->SetSpeed(10);
+			robots[i + population_size]->Reset();
 		}
 		/*Robot* pred = new Robot(default_pred_position.GetX(), default_pred_position.GetY(), -90);
 		pred->SetSprite(pred_image);
 		Add_Robot(*pred);
 		pred->Initialize();*/
 
-		robots.back()->SetSprite(robot_image);
-		robots.back()->SetPosition(default_pred_position, 90);
-		robots.back()->Get_Color() = ofColor(255, 0, 0);
-		robots.back()->Set_Pred(true);
+		
 	}
 
 	else {
@@ -333,16 +373,20 @@ void Tournament::Swap_Population() {
 			robots[i]->Reset();
 			robots[i]->Get_Color() = ofColor(255, 0, 0);
 			robots[i]->Set_Pred(true);
+			robots[i]->SetSpeed(10);
+
+			robots[i + population_size]->SetSprite(robot_image);
+			robots[i + population_size]->SetPosition(default_prey_position, -90);
+			robots[i + population_size]->Get_Color() = ofColor(0, 0, 255);
+			robots[i + population_size]->Set_Pred(false);
+			robots[i + population_size]->SetSpeed(15);
 		}
 		/*Robot* prey = new Robot(default_prey_position.GetX(), default_prey_position.GetY(), -90);
 		prey->SetSprite(prey_image);
 		Add_Robot(*prey);
 		prey->Initialize();*/
 
-		robots.back()->SetSprite(robot_image);
-		robots.back()->SetPosition(default_prey_position, -90);
-		robots.back()->Get_Color() = ofColor(0, 0, 255);
-		robots.back()->Set_Pred(false);
+		
 
 	}
 
@@ -378,15 +422,17 @@ void Tournament::Reset_and_Select_Population(std::vector<Robot*>& robots) {
 			prey_fitnesses[i] = prey_fitnesses[i] / sharing_sum;
 		}
 		robots[i]->Reset();
+
+		//Reset the population not being evolved
+		if (evolving_preds) {
+			robots[i + population_size] ->SetPosition(default_prey_position, -90);
+		}
+		else {
+			robots[i + population_size]->SetPosition(default_pred_position, 90);
+		}
+		robots[i + population_size]->Reset();
 	}
-	//Reset the single robot not being evolved
-	if (evolving_preds) {
-		robots.back()->SetPosition(default_prey_position, -90);
-	}
-	else {
-		robots.back()->SetPosition(default_pred_position, 90);
-	}
-	robots.back()->Reset();
+	
 
 	if (evolving_preds) {
 		Select_Pred_Population(pred_population, pred_fitnesses);
@@ -399,10 +445,10 @@ void Tournament::Reset_and_Select_Population(std::vector<Robot*>& robots) {
 //--------------------------------------------------------------------------------------
 
 void Tournament::Evaluate_Evolving_Population(std::vector<Robot*>& robots) {
+	std::vector<double> sensor_readings;
 	for (size_t i = 0; i < population_size; ++i) {
 		//Don't move the robot if it's collided with a wall
-		if (!robots[i]->Collided()) {
-			std::vector<double> sensor_readings;
+		if (!robots[i]->Get_Collided()) {
 			//Creates the input vector depending on the mode selected for the robots
 			if (mode == 0) {
 				sensor_readings = { robots[i]->Get_Position().GetX(), robots[i]->Get_Position().GetY(), robots[i]->Get_Orientation() };
@@ -411,7 +457,7 @@ void Tournament::Evaluate_Evolving_Population(std::vector<Robot*>& robots) {
 				sensor_readings = robots[i]->GetSensorReadings();
 			}
 			else {
-				std::vector<Robot*> robots_to_detect = { robots.back() };
+				std::vector<Robot*> robots_to_detect = { robots[i + population_size] };
 				std::vector<std::vector<ofColor>> camera_output = robots[i]->Get_Camera_Output(robots_to_detect);
 				std::vector<std::vector<double>> convolution = Convolute_Image(camera_output);
 				std::vector<double> pooled_output = Column_Pooling(convolution);
@@ -432,32 +478,15 @@ void Tournament::Evaluate_Evolving_Population(std::vector<Robot*>& robots) {
 			else {
 				net_output = prey_population[i].Execute(sensor_readings);
 			}
-			robots[i]->Move(net_output[0]);
 			robots[i]->Rotate(net_output[1]);
+			robots[i]->Move(net_output[0]);
 		}
 
-		//Now evaluate the fitness of the robot
-		if (robots[i]->Collided()) {
-			if (evolving_preds) {
-				pred_fitnesses[i] = -1000;
-			}
-			else {
-				prey_fitnesses[i] = -1000;
-			}
-		}
-		else if (evolving_preds) {
-			pred_fitnesses[i] += Calculate_Pred_Fitness(robots[i]);
+		if (evolving_preds) {
+			pred_fitnesses[i] += Calculate_Pred_Fitness(robots[i], i);
 		}
 		else {
-			double distance = Calculate_Prey_Fitness(robots[i]);
-
-			//Set the fitness to zero if the prey is caught
-			if (distance < 40) {
-				prey_fitnesses[i] = 0;
-			}
-			else {
-				prey_fitnesses[i] += Calculate_Prey_Fitness(robots[i]);
-			}
+			prey_fitnesses[i] += Calculate_Prey_Fitness(robots[i], i);
 		}
 	}
 }
@@ -467,55 +496,59 @@ void Tournament::Evaluate_Evolving_Population(std::vector<Robot*>& robots) {
 void Tournament::Evaluate_Static_Population(std::vector<Robot*>& robots) {
 	std::vector<double> net_output;
 	std::vector<double> sensor_readings;
-	if (mode == 0) {
-		sensor_readings = { robots.back()->Get_Position().GetX(), robots.back()->Get_Position().GetY(), robots.back()->Get_Orientation() };
-	}
-	else if (mode == 1) {
-		sensor_readings = robots.back()->GetSensorReadings();
-	}
-	else{
-		//For now, only let the robot see the closest out of the other population
-		int best_opposing_fitness_index;
-		if (evolving_preds) {
-			std::vector<double> pred_distances;
-			for (int i = 0; i < population_size; ++i) {
-				pred_distances.push_back(Distance(robots.back()->Get_Position(), robots[i]->Get_Position()));
+	for (size_t i = 0; i < population_size; ++i) {
+		if (!robots[i + population_size]->Get_Collided()) {
+			if (mode == 0) {
+				sensor_readings = { robots[i + population_size]->Get_Position().GetX(), robots[i + population_size]->Get_Position().GetY(), robots[i + population_size]->Get_Orientation() };
 			}
-			best_opposing_fitness_index = distance(pred_distances.begin(), max_element(pred_distances.begin(), pred_distances.end()));
-		}
-		else {
-			std::vector<double> prey_distances;
-			for (int i = 0; i < population_size; ++i) {
-				prey_distances.push_back(Distance(robots.back()->Get_Position(), robots[i]->Get_Position()));
+			else if (mode == 1) {
+				sensor_readings = robots[i + population_size]->GetSensorReadings();
 			}
-			best_opposing_fitness_index = distance(prey_distances.begin(), max_element(prey_distances.begin(), prey_distances.end()));
-		}
-		std::vector<Robot*> robots_to_detect = { robots[best_opposing_fitness_index] };
-		//std::vector<Robot*> robots_to_detect(robots.begin(), robots.begin() + population_size);
-		std::vector<std::vector<ofColor>> camera_output = robots.back()->Get_Camera_Output(robots_to_detect);
-		std::vector<std::vector<double>> convolution = Convolute_Image(camera_output);
-		std::vector<double> pooled_output = Column_Pooling(convolution);
-		Map_Values(pooled_output);
-		sensor_readings = pooled_output;
+			else {
+				//For now, only let the robot see the closest out of the other population
+				int best_opposing_fitness_index;
+				/*if (evolving_preds) {
+					std::vector<double> pred_distances;
+					for (int i = 0; i < population_size; ++i) {
+						pred_distances.push_back(Distance(robots.back()->Get_Position(), robots[i]->Get_Position()));
+					}
+					best_opposing_fitness_index = distance(pred_distances.begin(), max_element(pred_distances.begin(), pred_distances.end()));
+				}
+				else {
+					std::vector<double> prey_distances;
+					for (int i = 0; i < population_size; ++i) {
+						prey_distances.push_back(Distance(robots.back()->Get_Position(), robots[i]->Get_Position()));
+					}
+					best_opposing_fitness_index = distance(prey_distances.begin(), max_element(prey_distances.begin(), prey_distances.end()));
+				}*/
+				std::vector<Robot*> robots_to_detect = { robots[i] };
+				//std::vector<Robot*> robots_to_detect(robots.begin(), robots.begin() + population_size);
+				std::vector<std::vector<ofColor>> camera_output = robots[i + population_size]->Get_Camera_Output(robots_to_detect);
+				std::vector<std::vector<double>> convolution = Convolute_Image(camera_output);
+				std::vector<double> pooled_output = Column_Pooling(convolution);
+				Map_Values(pooled_output);
+				sensor_readings = pooled_output;
 
-		if (mode == 3) {
-			std::vector<double> additional_readings = robots.back()->GetSensorReadings();
-			Map_Values(additional_readings);
-			for (size_t i = 0; i < additional_readings.size(); ++i) {
-				sensor_readings.push_back(additional_readings[i]);
+				if (mode == 3) {
+					std::vector<double> additional_readings = robots[i + population_size]->GetSensorReadings();
+					Map_Values(additional_readings);
+					for (size_t i = 0; i < additional_readings.size(); ++i) {
+						sensor_readings.push_back(additional_readings[i]);
+					}
+				}
 			}
+
+			if (evolving_preds) {
+				net_output = best_prey->Execute(sensor_readings);
+				robots[i + population_size]->Collided(0, robots[i]);
+			}
+			else {
+				net_output = best_pred->Execute(sensor_readings);
+			}
+			robots[i + population_size]->Move(net_output[0]);
+			robots[i + population_size]->Rotate(net_output[1]);
 		}
 	}
-
-
-	if (evolving_preds) {
-		net_output = best_prey->Execute(sensor_readings);
-	}
-	else {
-		net_output = best_pred->Execute(sensor_readings);
-	}
-	robots.back()->Move(net_output[0]);
-	robots.back()->Rotate(net_output[1]);
 }
 
 //--------------------------------------------------------------------------------------
@@ -523,17 +556,10 @@ void Tournament::Evaluate_Static_Population(std::vector<Robot*>& robots) {
 void Tournament::Simulate_Brains_Initialize() {
 	pred_population.clear();
 	prey_population.clear();
-	ifstream infile1;
-	ifstream infile2;
-	infile1.open("robots/pred.txt");
-	infile2.open("robots/prey.txt");
 
 	std::vector<int> hidden_layers = { 1,1 };
 	Neural_Net test1(1, 1, hidden_layers);
 	Neural_Net test2(1, 1, hidden_layers);
-	test1.Read(infile1);
-	test2.Read(infile2);
-
 	pred_population.push_back(test1);
 	prey_population.push_back(test2);
 
@@ -551,6 +577,7 @@ void Tournament::Simulate_Brains_Initialize() {
 	robot->SetSprite(robot_img);
 	Add_Robot(*robot);
 	robot->Initialize();
+	robot->SetSpeed(10);
 
 	//Add in a single prey
 	Robot* prey = new Robot(default_prey_position.GetX(), default_prey_position.GetY(), -90);
@@ -559,14 +586,54 @@ void Tournament::Simulate_Brains_Initialize() {
 	prey->Set_Pred(false);
 	Add_Robot(*prey);
 	prey->Initialize();
+	prey->SetSpeed(15);
 }
 
 //--------------------------------------------------------------------------------------
 
 void Tournament::Simulate_Brains() {
+
+	static ifstream pred_infile;
+	static ifstream prey_infile;
+	static int iteration = 0;
+	static int cycle = 1;
+
+	if (iteration == 0) {
+		string pred = "robots/pred_";
+		pred += to_string(cycle);
+		pred += ".txt";
+
+		string prey = "robots/prey_";
+		prey += to_string(cycle);
+		prey += ".txt";
+
+		pred_infile.open(pred);
+		prey_infile.open(prey);
+		pred_population[0].Read(pred_infile);
+		prey_population[0].Read(prey_infile);
+		pred_infile.close();
+		prey_infile.close();
+		++iteration;
+		return;
+	}
+
 	std::vector<Robot*> robots = simulation->GetRobots();
+
+	if (iteration > 100) {
+		iteration = 0;
+		robots[0]->Reset();
+		robots[0]->SetPosition(default_pred_position, 90);
+		robots[1]->Reset();
+		robots[1]->SetPosition(default_prey_position, -90);
+		++generation;
+		++cycle;
+		evolving_preds = !evolving_preds;
+		return;
+	}
+
+	
 	for (int i = 0; i < 2; ++i) {
-		if (!robots[i]->Collided()) {
+		if (!robots[i]->Get_Collided()) {
 			std::vector<double> sensor_readings;
 			//Creates the input vector depending on the mode selected for the robots
 			if (mode == 0) {
@@ -576,8 +643,11 @@ void Tournament::Simulate_Brains() {
 				sensor_readings = robots[i]->GetSensorReadings();
 			}
 			else {
-				std::vector<Robot*> robots_to_detect = { robots.back() };
+				std::vector<Robot*> robots_to_detect = { robots[!i] };
 				std::vector<std::vector<ofColor>> camera_output = robots[i]->Get_Camera_Output(robots_to_detect);
+				ofImage image = Create_Image(camera_output);
+				ofSetColor(255, 255, 255);
+				image.draw(200, 200);
 				std::vector<std::vector<double>> convolution = Convolute_Image(camera_output);
 				std::vector<double> pooled_output = Column_Pooling(convolution);
 				Map_Values(pooled_output);
@@ -597,12 +667,14 @@ void Tournament::Simulate_Brains() {
 			}
 			else {
 				net_output = prey_population[0].Execute(sensor_readings);
+				robots[1]->Collided(0, robots[0]);
 			}
 			robots[i]->Move(net_output[0]);
 			robots[i]->Rotate(net_output[1]);
 		}
 	}
 	Render(true);
+	++iteration;
 }
 
 //--------------------------------------------------------------------------------------

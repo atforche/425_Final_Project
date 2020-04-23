@@ -41,41 +41,38 @@ std::vector<std::vector<double>> Matrix_Multiplication(std::vector<std::vector<d
 
 int Map_Distance_To_Pixels(double distance_reading) {
 	int distance = int(distance_reading);
-	if (distance > 600) {
-		return 0;
-	}
-	else if (distance > 540) {
-		return 2;
-	}
-	else if (distance > 480) {
-		return 4;
-	}
-	else if (distance > 420) {
-		return 6;
-	}
-	else if (distance > 360) {
-		return 8;
-	}
-	else if (distance > 300) {
-		return 10;
-	}
-	else if (distance > 240) {
-		return 12;
-	}
-	else if (distance > 180) {
-		return 14;
-	}
-	else if (distance > 120) {
+	if (distance > 720) {
 		return 16;
 	}
-	else if (distance > 60) {
-		return 18;
-	}
-	else if (distance > 30) {
+	else if (distance > 640) {
 		return 20;
 	}
-	else {
+	else if (distance > 580) {
 		return 24;
+	}
+	else if (distance > 420) {
+		return 28;
+	}
+	else if (distance > 360) {
+		return 32;
+	}
+	else if (distance > 300) {
+		return 36;
+	}
+	else if (distance > 240) {
+		return 40;
+	}
+	else if (distance > 180) {
+		return 44;
+	}
+	else if (distance > 120) {
+		return 48;
+	}
+	else if (distance > 60) {
+		return 52;
+	}
+	else {
+		return 56;
 	}
 }
 //--------------------------------------------------------------------------------------

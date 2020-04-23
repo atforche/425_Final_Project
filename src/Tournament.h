@@ -75,7 +75,7 @@ public:
 	//Requires: nothing
 	//Modifies: itself
 	//Effects: Runs the tournament selection on the population of Neural Nets
-	void Run_Tournament();
+	void Run_Tournament(bool render = false);
 
 	//Requires: int tournament_size
 	//Modifies: population
@@ -85,12 +85,12 @@ public:
 	//Requires: Robot robot
 	//Modifies: nothing
 	//Effects: Calculates the fitness of a predator robot at any particular moment in time
-	double Calculate_Pred_Fitness(Robot* robot);
+	double Calculate_Pred_Fitness(Robot* robot, int index);
 
 	//Requires: Robot robot
 	//Modifies: nothing
 	//Effects: Calculates the fitness of a pey robot at any particular moment in time
-	double Calculate_Prey_Fitness(Robot* robot);
+	double Calculate_Prey_Fitness(Robot* robot, int index);
 
 	//Requires: std::vector<Neural_Net> pred_population, std::vector<double> pred_fitnesses
 	//Modifies: pred_population, pred_fitnesses

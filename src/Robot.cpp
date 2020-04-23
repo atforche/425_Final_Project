@@ -80,7 +80,7 @@ void Robot::Render(bool render_sensors) {
 //--------------------------------------------------------------------------------------
 
 void Robot::Move(double input) {
-	if (!Collided(input)) {
+	if (!Collided(input) && !collided) {
 		pos.GetX() = (pos.GetX() + input * speed * orientation.GetX());
 		pos.GetY() = (pos.GetY() + input * speed * orientation.GetY());
 
@@ -109,7 +109,7 @@ void Robot::Rotate(double input) {
 
 //--------------------------------------------------------------------------------------
 
-bool Robot::Collided(int input) {
+bool Robot::Collided(double input, Robot* robot) {
 	for (Wall wall : walls) {
 		Coordinate beginning = wall.GetBeginning();
 		Coordinate ending = wall.GetEnding();
@@ -121,7 +121,6 @@ bool Robot::Collided(int input) {
 		if (std::abs(dist_ab - (dist_ac + dist_cb)) < 2) {
 			return true;
 		}
-		continue;
 	}
 
 	//Checks to see if the robot will move through a wall on its next move
@@ -129,7 +128,16 @@ bool Robot::Collided(int input) {
 		Sensor will_collide(pos.GetX(), pos.GetY(), rotation);
 		will_collide.AddWalls(walls);
 		double min_dist = will_collide.Calculate_Distance();
-		if (min_dist < input * speed) {
+		if (min_dist <= (input * speed)) {
+			return true;
+		}
+	}
+
+	if (robot) {
+		Coordinate pred_position = robot->Get_Position();
+		double distance = Distance(pos, pred_position);
+		if (distance < 40) {
+			collided = true;
 			return true;
 		}
 	}
@@ -228,16 +236,16 @@ std::vector<std::vector<ofColor>> Robot::Get_Camera_Output(std::vector<Robot*> r
 	//Constructing a vector from what each sample returns
 
 	//Initialize the camera sensor
-	Sensor camera(pos.GetX(), pos.GetY(), fmod(rotation - 22.5, 360));
+	Sensor camera(pos.GetX(), pos.GetY(), fmod(rotation - 60, 360));
 	camera.AddWalls(temp_walls);
 
-	//Get 30 samples from the 45 degree FOV in front of the robot (every 1.5 degrees)
-	for (int i = 0; i < 30; ++i) {
+	//Get 30 samples from the 120 degree FOV in front of the robot (every 1.5 degrees)
+	for (int i = 0; i < 60; ++i) {
 		ofColor color_reading;
 		double distance_reading = camera.Camera_Calculate_Distance(color_reading);
 		color_readings.push_back(color_reading);
 		distance_readings.push_back(distance_reading);
-		camera.Rotate(1.5);
+		camera.Rotate(2);
 	}
 
 	//Then, convert the sample vector into a 30x30 image type thingy
@@ -291,6 +299,12 @@ void Robot::Set_Pred(bool pred_in) {
 
 bool Robot::Get_Pred() {
 	return pred;
+}
+
+//--------------------------------------------------------------------------------------
+
+bool Robot::Get_Collided() {
+	return collided;
 }
 
 //--------------------------------------------------------------------------------------
