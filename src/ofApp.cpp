@@ -29,11 +29,13 @@ void ofApp::setup(){
 		break;
 	case Image:
 		hidden_layers = { 200,50 };
-		tournament->Initialize_Population(90, hidden_layers);
+		//tournament->Initialize_Population(90, hidden_layers);
+		tournament->Initialize_Population(135, hidden_layers);
 		break;
 	case Image_and_Sensors:
 		hidden_layers = { 200,100 };
-		tournament->Initialize_Population(101, hidden_layers);
+		//tournament->Initialize_Population(101, hidden_layers);
+		tournament->Initialize_Population(146, hidden_layers);
 	}
 	tournament->Set_Mode(mode);
 	tournament->Initialize(population_size);

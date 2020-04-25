@@ -236,11 +236,12 @@ std::vector<std::vector<ofColor>> Robot::Get_Camera_Output(std::vector<Robot*> r
 	//Constructing a vector from what each sample returns
 
 	//Initialize the camera sensor
-	Sensor camera(pos.GetX(), pos.GetY(), fmod(rotation - 45, 360));
+	double FOV = 135;
+	Sensor camera(pos.GetX(), pos.GetY(), fmod(rotation - (FOV / 2), 360));
 	camera.AddWalls(temp_walls);
 
 	//Get 180 samples from the 90 degree FOV in front of the robot (every 1.5 degrees)
-	for (int i = 0; i < 270; ++i) {
+	for (int i = 0; i < 3 * FOV; ++i) {
 		ofColor color_reading;
 		double distance_reading = camera.Camera_Calculate_Distance(color_reading);
 		color_readings.push_back(color_reading);

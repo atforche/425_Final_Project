@@ -22,8 +22,8 @@ Tournament::Tournament(int pop_size_in, int num_generations_in) {
 	num_generations = num_generations_in;
 	mutation_rate = 0.10;
 	iterations = 100;
-	default_pred_position = Coordinate(200, 400);
-	default_prey_position = Coordinate(600, 400);
+	default_pred_position = Coordinate(100, 400);
+	default_prey_position = Coordinate(700, 400);
 	generation = 1;
 	pred_fitnesses.resize(population_size);
 	prey_fitnesses.resize(population_size);
@@ -190,7 +190,10 @@ void Tournament::Run_Tournament(bool render) {
 		//Reset the robots begin evolved
 		Reset_and_Select_Population(robots);
 		iteration = 0;
-		mutation_rate = mutation_rate - 0.005;
+		//mutation_rate = mutation_rate - 0.005;
+		//Let the mutation rate vary depending on how close to the max fitness we are
+		double best_to_max_ratio = best_fitness / (1131 * iterations);
+		mutation_rate = (1 - best_to_max_ratio) / 10;
 		return;
 	}
 	
@@ -593,7 +596,7 @@ void Tournament::Simulate_Brains_Initialize() {
 	delete simulation;
 	simulation = new Sim(800, 800);
 	simulation->Initialize();
-	//simulation->Add_Wall(Wall(Coordinate(400, 100), Coordinate(400, 700)));
+	simulation->Add_Wall(Wall(Coordinate(400, 300), Coordinate(400, 500)));
 
 	ofImage robot_img("sprite.png");
 	robot_img.resize(40, 40);

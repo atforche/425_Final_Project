@@ -25,6 +25,7 @@ void Sim::Add_Robot(Robot &robot) {
 
 void Sim::Add_Wall(Wall& wall) {
 	walls.push_back(wall);
+	walls.back().Get_Color() = ofColor(0, 255, 0);
 }
 
 //--------------------------------------------------------------------------------------
