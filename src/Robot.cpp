@@ -211,7 +211,7 @@ double Robot::Get_Orientation() {
 
 //--------------------------------------------------------------------------------------
 
-std::vector<std::vector<ofColor>> Robot::Get_Camera_Output(std::vector<Robot*> robots) {
+std::vector<std::vector<ofColor>> Robot::Get_Camera_Output(std::vector<Robot*> &robots) {
 
 	std::vector<int> output;
 	std::vector<ofColor> color_readings;

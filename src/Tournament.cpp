@@ -22,8 +22,8 @@ Tournament::Tournament(int pop_size_in, int num_generations_in) {
 	num_generations = num_generations_in;
 	mutation_rate = 0.10;
 	iterations = 100;
-	default_pred_position = Coordinate(100, 400);
-	default_prey_position = Coordinate(700, 400);
+	default_pred_position = Coordinate(400, 100);
+	default_prey_position = Coordinate(400, 400);
 	generation = 1;
 	pred_fitnesses.resize(population_size);
 	prey_fitnesses.resize(population_size);
@@ -121,7 +121,7 @@ void Tournament::Render(bool render) {
 		}
 	}
 	else {
-		simulation->Render();
+		simulation->Render(true);
 	}
 }
 
@@ -141,8 +141,8 @@ void Tournament::Run_Tournament(bool render) {
 		ofstream outfile1;
 		ofstream outfile2;
 
-		outfile1.open("robots_Wall/pred.txt");
-		outfile2.open("robots_Wall/prey.txt");
+		outfile1.open("robots_AM_135_Image_Sensors/pred.txt");
+		outfile2.open("robots_AM_135_Image_Sensors/prey.txt");
 
 		best_pred->Print(outfile1);
 		best_prey->Print(outfile2);
@@ -162,11 +162,11 @@ void Tournament::Run_Tournament(bool render) {
 		ofstream pred_outfile;
 		ofstream prey_outfile;
 
-		std::string pred = "robots_Wall/pred_";
+		std::string pred = "robots_AM_135_Image_Sensors/pred_";
 		pred += to_string(cycles);
 		pred += ".txt";
 
-		std::string prey = "robots_Wall/prey_";
+		std::string prey = "robots_AM_135_Image_Sensors/prey_";
 		prey += to_string(cycles);
 		prey += ".txt";
 
@@ -596,7 +596,7 @@ void Tournament::Simulate_Brains_Initialize() {
 	delete simulation;
 	simulation = new Sim(800, 800);
 	simulation->Initialize();
-	simulation->Add_Wall(Wall(Coordinate(400, 300), Coordinate(400, 500)));
+	//simulation->Add_Wall(Wall(Coordinate(400, 300), Coordinate(400, 500)));
 
 	ofImage robot_img("sprite.png");
 	robot_img.resize(40, 40);
@@ -629,11 +629,11 @@ void Tournament::Simulate_Brains() {
 	static int cycle = 1;
 
 	if (iteration == 0) {
-		string pred = "robots_Wall/pred_";
+		string pred = "robots_AM_135_Image_Sensors/pred_";
 		pred += to_string(cycle);
 		pred += ".txt";
 
-		string prey = "robots_Wall/prey_";
+		string prey = "robots_AM_135_Image_Sensors/prey_";
 		prey += to_string(cycle);
 		prey += ".txt";
 
@@ -655,8 +655,10 @@ void Tournament::Simulate_Brains() {
 		robots[0]->SetPosition(default_pred_position, 90);
 		robots[1]->Reset();
 		robots[1]->SetPosition(default_prey_position, -90);
-		++generation;
-		++cycle;
+		generation += 10;
+		cycle += 10;
+		if (cycle == 51) { cycle = 50; }
+		if (generation == 51) { generation = 50; }
 		evolving_preds = !evolving_preds;
 		return;
 	}
@@ -743,19 +745,20 @@ void Tournament::Test() {
 	//	std::cout << std::setprecision(3) << pooled_output[i] << " ";
 	//}
 
-	ofstream outfile;
-	outfile.open("robots_Wall/one.txt");
+	/*ofstream outfile;
+	outfile.open("robots_AM_135_Image_Sensors/one.txt");
 	pred_population[0].Print(outfile);
 	outfile.close();
 
 	ifstream infile;
-	infile.open("robots_Wall/one.txt");
+	infile.open("robots_AM_135_Image_Sensors/one.txt");
 	std::vector<int> hidden_layers = { 1 };
 	Neural_Net test(1, 1, hidden_layers);
 	test.Read(infile);
 
-	double difference = Neural_Net_Distance(pred_population[0].Get_Layers(), test.Get_Layers());
-	exit(0);
+	double difference = Neural_Net_Distance(pred_population[0].Get_Layers(), test.Get_Layers());*/
+
+	Render(true);
 }
 
 //--------------------------------------------------------------------------------------

@@ -39,7 +39,7 @@ void ofApp::setup(){
 	}
 	tournament->Set_Mode(mode);
 	tournament->Initialize(population_size);
-	//tournament->Simulate_Brains_Initialize();
+	tournament->Simulate_Brains_Initialize();
 }
 
 //--------------------------------------------------------------
@@ -49,17 +49,22 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-	ofSetFrameRate(1000);
-	//ofSetFrameRate(30);
+	static bool pause = true;
+	//ofSetFrameRate(1000);
+	ofSetFrameRate(15);
 	//ofSetFrameRate(1);
 	if (tournament->Get_Generation() % num_generations == 0) {
 		ofSetFrameRate(30);
 	}
+	if (tournament->Get_Generation() == 1 && pause) {
+		system("pause");
+		pause = false;
+	}
 	ofBackground(255, 204, 153);
 	//ofDrawCircle(700, 100, 5);
-	tournament->Run_Tournament(true);
+	//tournament->Run_Tournament(true);
 	//tournament->Render(true);
-	//tournament->Test();
+	tournament->Test();
 	//tournament->Simulate_Brains();
 }
 
